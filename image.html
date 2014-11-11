@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<img id="pic1" src="biji kopi.jpg" width="560" height="324">
+<canvas id="myCanvas1" width="560" height="324">
+</canvas>
+<canvas id="myCanvas2" width="560" height="324">
+</canvas>
+<canvas id="myCanvas3" width="560" height="324">
+</canvas>
+
+<script>
+document.getElementById("pic1").onload=function(){
+  var img=document.getElementById("pic1");
+
+  //mengisi myCanvas1 dengan gambar pic1
+  var c1=document.getElementById("myCanvas1");
+  var ctx1=c1.getContext("2d");
+  // ctx1.fillStyle="#FFFFFF";
+  // ctx1.fillRect(0,0,560,324);
+  ctx1.drawImage(img,0,0);
+  var imgGrayScale=ctx1.getImageData(0,0,c1.width,c1.height);
+
+  //mengisi myCanvas2 dengan gambar pic1
+  var c2=document.getElementById("myCanvas2");
+  var ctx2=c2.getContext("2d");
+  // ctx2.fillStyle="#FFFFFF";
+  // ctx2.fillRect(0,0,560,324);
+  ctx2.drawImage(img,0,0);
+  var imgNegative=ctx2.getImageData(0,0,c2.width,c2.height);
+
+  //mengisi myCanvas3 dengan gambar pic1
+  var c3=document.getElementById("myCanvas3");
+  var ctx3=c3.getContext("2d");
+  // ctx3.fillStyle="#FFFFFF";
+  // ctx3.fillRect(0,0,560,324);
+  ctx3.drawImage(img,0,0);
+  var imgStret=ctx3.getImageData(0,0,c3.width,c3.height);
+  
+  var rMin=255; //digunakan untuk mencari nilai r minimum & maksimum, untuk keperluan contrast stretching
+  var rMax=0;
+
+  for (var i=0; i<imgGrayScale.data.length; i+=4){
+    //menghitung nilai gray, grayLevel = (R+G+B)/3 dibulatkan
+    grayLevel=Math.round((imgGrayScale.data[i]+imgGrayScale.data[i+1]+imgGrayScale.data[i+2])/3);
+
+    imgGrayScale.data[i]=grayLevel;
+    imgGrayScale.data[i+1]=grayLevel;
+    imgGrayScale.data[i+2]=grayLevel;
+    imgGrayScale.data[i+3]=255;
+    
+    imgNegative.data[i]=255-grayLevel;
+    imgNegative.data[i+1]=255-grayLevel;
+    imgNegative.data[i+2]=255-grayLevel;
+    imgNegative.data[i+3]=255;
+    
+    if (rMin>grayLevel) {
+      rMin=grayLevel;
+    }
+    if (rMax<grayLevel) {
+      rMax=grayLevel;
+    } 
+  }
+
+  gradient = (255-0)/(rMax - rMin);
+
+  for (var i=0; i<imgStret.data.length; i+=4){
+    imgStret.data[i]=Math.round(gradient*(imgGrayScale.data[i]-rMin));
+    imgStret.data[i+1]=Math.round(gradient*(imgGrayScale.data[i+1]-rMin));
+    imgStret.data[i+2]=Math.round(gradient*(imgGrayScale.data[i+2]-rMin));
+    imgStret.data[i+3]=255;
+  }
+
+  ctx1.putImageData(imgGrayScale,0,0); //menerapkan perubahan data warna ke myCanvas1 shg mjd grayscale
+  ctx2.putImageData(imgNegative,0,0); //menerapkan perubahan data warna ke myCanvas2 shg mjd negative grayscale
+  ctx3.putImageData(imgStret,0,0); //menerapkan perubahan data warna untuk contrast stretching ke myCanvas3
+};
+</script>
+
+</body>
+</html>
